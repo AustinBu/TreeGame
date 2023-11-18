@@ -13,17 +13,20 @@ class Platform(pygame.sprite.Sprite):
 
 pygame.init()
 
-screen = pygame.display.set_mode((500, 500))
+screen = pygame.display.set_mode((1280, 720))
 
 pygame.display.set_caption('TreeGame')
+
+
+tree = pygame.transform.scale(pygame.image.load("tree.png").convert_alpha(), (300, 300))
 
 item = 'watercan'
 tree = pygame.transform.scale(pygame.image.load("tree.png").convert_alpha(), (128, 128))
 watercan = pygame.transform.scale(pygame.image.load("watercan.png").convert_alpha(), (128, 64))
 fertilizer = pygame.transform.scale(pygame.image.load("fertilizer.png").convert_alpha(), (64, 64))
 
+
 screen.fill('cadetblue1')
-screen.blit(tree, (200, 200))
 
 pygame.display.flip()
 status = True
@@ -58,8 +61,9 @@ def refresh_screen():
 platform = Platform(0, 650, 1300, 100, 'Tileset.png')
 sky = Platform(0,0, 1300,800,'CloudsBack.png')
 all_sprites = pygame.sprite.Group()
-all_sprites.add(sky)
-all_sprites.add(platform)
+all_sprites.add(sky,platform)
+cloud = pygame.image.load('Clouds.png').convert_alpha()
+#tree
 
 while status:
     for event in pygame.event.get():
@@ -80,5 +84,8 @@ while status:
                 fertilize(pos)
             pygame.event.clear()
     all_sprites.draw(screen)
+    screen.blit(cloud,(0,0))
+    screen.blit(tree, (200, 200))
+    pygame.display.update()
 
 pygame.quit()
