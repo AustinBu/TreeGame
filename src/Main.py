@@ -1,5 +1,5 @@
 import pygame
-
+import math
 # x location, y location, img width, img height, img file
 class Platform(pygame.sprite.Sprite):
     def __init__(self, xloc, yloc, imgw, imgh, img):
@@ -29,14 +29,19 @@ sky = Platform(0,0, 1300,800,'CloudsBack.png')
 all_sprites = pygame.sprite.Group()
 all_sprites.add(sky,platform)
 cloud = pygame.image.load('Clouds.png').convert_alpha()
-#tree
+tiles = math.ceil(1280/cloud.get_width()) + 1
+scroll = 0
 
 while status:
+    all_sprites.draw(screen)
+    for i in range(0,tiles):
+        screen.blit(cloud,(i * cloud.get_width() + scroll,0))
+    scroll -= .1
+    if abs(scroll) > cloud.get_width():
+        scroll = 0
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
             status = False
-    all_sprites.draw(screen)
-    screen.blit(cloud,(0,0))
     screen.blit(tree, (200, 200))
     pygame.display.update()
 
