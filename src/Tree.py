@@ -1,15 +1,18 @@
 import math
 import random
 
-class Tree:
-    location = [300, 300]
 
-    water_state = 'normal'
-    nutrient_state = 'normal'
-    water = 500
-    nutrients = 500
-    WATER_MAX = 1000
-    NUTRIENT_MAX = 1000
+class Tree:
+    def __init__(self, x, y):
+        self.size = [x, y]
+        self.water_state = 'normal'
+        self.nutrient_state = 'normal'
+        self.water = 500
+        self.nutrients = 500
+        self.WATER_MAX = 1000
+        self.NUTRIENT_MAX = 1000
+
+    img=''
 
     def lose_water(self):
         self.water = self.water - math.ceil(self.water * self.water / 100000)
@@ -24,7 +27,7 @@ class Tree:
         self.nutrients = self.nutrients + 150
 
     def check_water(self):
-        if self.water <= 0 :
+        if self.water <= 0:
             self.water_state = 'dry'
         elif self.water <= 300:
             self.water_state = 'thirsty'
@@ -36,7 +39,7 @@ class Tree:
             self.water_state = 'soggy'
 
     def check_nutrients(self):
-        if self.nutrients <= 0 :
+        if self.nutrients <= 0:
             self.nutrient_state = 'starving'
         elif self.nutrients <= 300:
             self.nutrient_state = 'hungry'
@@ -45,9 +48,4 @@ class Tree:
         elif self.nutrients <= 1000:
             self.nutrient_state = 'full'
         elif self.nutrients > self.NUTRIENT_MAX:
-            self.nutrient_state = 'full'
-            self.nutrients = self.NUTRIENT_MAX
-
-
-
-
+            self.nutrient_state = 'stuffed'
