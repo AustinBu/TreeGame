@@ -1,22 +1,21 @@
 import pygame
-from pygame.locals import *
 
 pygame.init()
 
-window = pygame.display.set_mode((600, 600))
+screen = pygame.display.set_mode((500, 500))
 
-window.fill((255, 255, 255))
+pygame.display.set_caption('TreeGame')
 
-pygame.draw.rect(window, (0, 0, 255),
-                 [100, 100, 400, 100], 2)
+tree = pygame.transform.scale(pygame.image.load("tree.png").convert_alpha(), (128, 128))
 
-pygame.display.update()
+screen.fill('cadetblue1')
+screen.blit(tree, (200, 200))
 
-running = True
+pygame.display.flip()
+status = True
+while status:
+    for i in pygame.event.get():
+        if i.type == pygame.QUIT:
+            status = False
 
-while running:
-
-    for event in pygame.event.get():
-
-        if event.type == pygame.QUIT:
-            running = False
+pygame.quit()
