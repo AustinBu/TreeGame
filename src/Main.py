@@ -1,6 +1,9 @@
 import pygame
 import time
 
+from src.Tree import Tree
+
+
 # x location, y location, img width, img height, img file
 class Platform(pygame.sprite.Sprite):
     def __init__(self, xloc, yloc, imgw, imgh, img):
@@ -11,25 +14,17 @@ class Platform(pygame.sprite.Sprite):
         self.rect.y = yloc
         self.rect.x = xloc
 
+
 pygame.init()
 
 screen = pygame.display.set_mode((1280, 720))
 
 pygame.display.set_caption('TreeGame')
 
-
-tree = pygame.transform.scale(pygame.image.load("tree.png").convert_alpha(), (300, 300))
-
 item = 'watercan'
-tree = pygame.transform.scale(pygame.image.load("tree.png").convert_alpha(), (128, 128))
+tree = Tree()
 watercan = pygame.transform.scale(pygame.image.load("watercan.png").convert_alpha(), (128, 64))
 fertilizer = pygame.transform.scale(pygame.image.load("fertilizer.png").convert_alpha(), (64, 64))
-
-
-screen.fill('cadetblue1')
-
-pygame.display.flip()
-status = True
 
 
 def water(pos):
@@ -43,6 +38,8 @@ def water(pos):
     pygame.display.flip()
     time.sleep(0.5)
     refresh_screen()
+    tree.water = tree.water + 100
+
 
 def fertilize(pos):
     for x in range(0, 45, 5):
@@ -50,21 +47,31 @@ def fertilize(pos):
         pygame.display.flip()
         time.sleep(0.1)
         refresh_screen()
+    tree.nutrients = tree.nutrients + 100
+
 
 def refresh_screen():
-    screen.fill('cadetblue1')
-    screen.blit(tree, (200, 200))
+    all_sprites.draw(screen)
+    screen.blit(cloud, (0, 0))
+    screen.blit(pygame.transform.scale(pygame.image.load("tree.png").convert_alpha(), tree.location), (200, 200))
+    pygame.display.update()
     pygame.display.flip()
 
 
-#platform code
+# platform code
 platform = Platform(0, 650, 1300, 100, 'Tileset.png')
-sky = Platform(0,0, 1300,800,'CloudsBack.png')
+sky = Platform(0, 0, 1300, 800, 'CloudsBack.png')
 all_sprites = pygame.sprite.Group()
-all_sprites.add(sky,platform)
+all_sprites.add(sky, platform)
 cloud = pygame.image.load('Clouds.png').convert_alpha()
-#tree
+# tree
 
+LOSE_WATER = pygame.USEREVENT + 1
+LOSE_NUTRIENTS = pygame.USEREVENT + 2
+pygame.time.set_timer(LOSE_WATER, 1000)
+pygame.time.set_timer(LOSE_NUTRIENTS, 1000)
+
+status = True
 while status:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -74,18 +81,23 @@ while status:
                 item = 'watercan'
             elif event.key == pygame.K_f:
                 item = 'fertilizer'
-
+            elif event.key == pygame.K_c:
+                print(tree.water)
+                print(tree.nutrients)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if item == 'watercan':
-                pos = [event.pos[0]-30, event.pos[1]-70]
+                pos = [event.pos[0] - 30, event.pos[1] - 70]
                 water(pos)
             elif item == 'fertilizer':
-                pos = [event.pos[0]-20, event.pos[1]-40]
+                pos = [event.pos[0] - 20, event.pos[1] - 40]
                 fertilize(pos)
-            pygame.event.clear()
-    all_sprites.draw(screen)
-    screen.blit(cloud,(0,0))
-    screen.blit(tree, (200, 200))
-    pygame.display.update()
+        elif event.type == LOSE_WATER:
+            tree.lose_water()
+        elif event.type == LOSE_NUTRIENTS:
+            tree.lose_nutrients()
+
+        pygame.event.clear(pygame.MOUSEBUTTONDOWN)
+        refresh_screen()
+
 
 pygame.quit()
