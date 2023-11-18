@@ -12,14 +12,13 @@ class Platform(pygame.sprite.Sprite):
 
 pygame.init()
 
-screen = pygame.display.set_mode((500, 500))
+screen = pygame.display.set_mode((1280, 720))
 
 pygame.display.set_caption('TreeGame')
 
-tree = pygame.transform.scale(pygame.image.load("tree.png").convert_alpha(), (128, 128))
+tree = pygame.transform.scale(pygame.image.load("tree.png").convert_alpha(), (300, 300))
 
 screen.fill('cadetblue1')
-screen.blit(tree, (200, 200))
 
 pygame.display.flip()
 status = True
@@ -28,13 +27,17 @@ status = True
 platform = Platform(0, 650, 1300, 100, 'Tileset.png')
 sky = Platform(0,0, 1300,800,'CloudsBack.png')
 all_sprites = pygame.sprite.Group()
-all_sprites.add(sky)
-all_sprites.add(platform)
+all_sprites.add(sky,platform)
+cloud = pygame.image.load('Clouds.png').convert_alpha()
+#tree
 
 while status:
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
             status = False
     all_sprites.draw(screen)
+    screen.blit(cloud,(0,0))
+    screen.blit(tree, (200, 200))
+    pygame.display.update()
 
 pygame.quit()
