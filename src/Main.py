@@ -63,21 +63,32 @@ class Water(pygame.sprite.Sprite):
             
             self.image = self.sprites[int(self.current_sprite)]
 
-def fertilize(pos):
-    global fertilizer_time, fertilizing
-    current_time = pygame.time.get_ticks()
-    if current_time - fertilizer_time < 750:
-        screen.blit(fertilizer[0], pos)
-        pygame.display.flip()
-    elif 750 < current_time - fertilizer_time < 1250:
-        screen.blit(fertilizer[1], pos)
-        pygame.display.flip()
-        tree.add_water()
-    elif current_time - fertilizer_time > 1250:
-        pygame.display.flip()
-        fertilizer_time = current_time
-        fertilizing = False
-    pygame.event.clear(pygame.MOUSEBUTTONDOWN)
+fertilizing = False
+class Fertilizer(pygame.sprite.Sprite):
+    def __init__(self, posx, posy):
+        super().__init__()
+        self.sprites = [pygame.transform.scale(pygame.image.load('fert1.png').convert_alpha(),(140, 85)),
+        pygame.transform.scale(pygame.image.load('fert2.png').convert_alpha(),(140, 85)),
+        pygame.transform.scale(pygame.image.load('fert3.png').convert_alpha(),(140, 85)),
+        pygame.transform.scale(pygame.image.load('fert4.png').convert_alpha(),(140, 85)),
+        pygame.transform.scale(pygame.image.load('fert5.png').convert_alpha(),(140, 85)),
+        pygame.transform.scale(pygame.image.load('fert6.png').convert_alpha(),(140, 85))]
+        self.current_sprite = 0
+        self.image = self.sprites[self.current_sprite]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [posx,posy]
+        self.animating = True
+        self.done_animating = False
+    
+    def update(self):
+        if self.animating:
+            self.current_sprite += 0.5  
+            if self.current_sprite >= len(self.sprites):
+                self.current_sprite = len(self.sprites) - 1  
+                self.animating = False 
+                self.done_animating = True
+            
+            self.image = self.sprites[int(self.current_sprite)]
 
 # platform code
 platform = Platform(0, 650, 1300, 100, 'Tileset.png')
@@ -90,9 +101,10 @@ scroll = 0
 
 moving_sprites = pygame.sprite.Group()
 watering_can = None
+fertilizing_bag = None
 
 def refresh_screen():
-    global watering,watering_can,moving_sprites
+    global watering,watering_can,moving_sprites,fertilizing_bag,fertilizing
     clock.tick(30)
     all_sprites.draw(screen)
     clouds()
@@ -104,8 +116,10 @@ def refresh_screen():
         watering_can = None  # Reset watering_can
         watering = False
 
-    if fertilizing:
-        fertilize(fertilize_pos)
+    if fertilizing_bag and fertilizing_bag.done_animating:
+        moving_sprites.remove(fertilizing_bag)
+        fertilizing_bag = None  # Reset fertilizing bag
+        fertilizing = False
     screen.blit(tree.img, (200, 350))
     pygame.display.flip()
 
@@ -123,7 +137,6 @@ LOSE_NUTRIENTS = pygame.USEREVENT + 2
 pygame.time.set_timer(LOSE_WATER, 1000)
 pygame.time.set_timer(LOSE_NUTRIENTS, 1000)
 
-watering_can = None
 status = True
 while status:
     all_sprites.draw(screen)
@@ -144,8 +157,10 @@ while status:
                 watering_can = Water(water_pos[0], water_pos[1])
                 moving_sprites.add(watering_can)
                 watering = True
-            elif item == 'fertilizer':
+            elif item == 'fertilizer' and not fertilizing:
                 fertilize_pos = [event.pos[0] - 20, event.pos[1] - 40]
+                fertilizing_bag = Fertilizer(fertilize_pos[0],fertilize_pos[1])
+                moving_sprites.add(fertilizing_bag)
                 fertilizing = True
         elif event.type == LOSE_WATER:
             tree.lose_water()
