@@ -2,8 +2,8 @@ import random
 
 import pygame
 import math
-import time
 
+from pygame import mixer
 from TreeHealth import TreeHealth
 
 
@@ -19,6 +19,8 @@ class Platform(pygame.sprite.Sprite):
 
 
 pygame.init()
+mixer.init()
+mixer.Channel(0).play(mixer.Sound("./sound/Relax in the Forest.mp3"), loops=-1)
 
 screen = pygame.display.set_mode((1280, 720))
 # counter
@@ -85,7 +87,8 @@ fertilizer_time = 0
 fertilizing = False
 fertilize_pos = [0, 0]
 seed_image = pygame.transform.scale(pygame.image.load('seed.png').convert_alpha(), (128, 128))
-
+austintree_image = pygame.transform.scale(pygame.image.load('tree.png').convert_alpha(), (128, 128))
+textbox_image = pygame.transform.scale(pygame.image.load('tree_textbox.png').convert_alpha(), (458, 512))
 
 class Menu:
     def __init__(self, posx, posy):
@@ -180,6 +183,8 @@ def refresh_screen():
     for tree in tree_list:
         screen.blit(tree.image, (tree.rect.x, tree.rect.y))
     screen.blit(seed_image, (1050, 90))
+    screen.blit(austintree_image, (500, 100))
+    screen.blit(textbox_image, (550, -100))
     screen.blit(menu.image, (menu.x, menu.y))
     moving_sprites.update()
     moving_sprites.draw(screen)
@@ -243,6 +248,10 @@ def kill_tree(tree):
     tree_list.remove(tree)
     del tree
 
+loss = False
+def check_loss():
+    if money < 1000 and tree_spots_taken.index(True) == -1:
+        loss = True
 
 status = True
 while status:
@@ -255,7 +264,10 @@ while status:
                 item = 'watercan'
             elif event.key == pygame.K_f:
                 item = 'fertilizer'
-            elif event.key == pygame.K_c:
+            elif event.key == pygame.K_r and loss == True:
+                money += 1000
+                tree_list.append(TreeHealth(tree1_imagelist, tree_spots[0]))
+        elif event.key == pygame.K_c:
                 for tree in tree_list:
                     print(tree.alive)
                     print(tree.water)
@@ -264,6 +276,7 @@ while status:
                     print(tree.growth_stage)
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
+            mixer.Channel(1).play(mixer.Sound("./sound/click.wav"))
             if menu.x < event.pos[0] < menu.x + menu.image.get_rect()[2] \
                     and menu.y < event.pos[1] < menu.y + menu.image.get_rect()[3]:
                 if menu.x + 48 < event.pos[0] < menu.x + 188:
@@ -278,6 +291,7 @@ while status:
             elif 1050 < event.pos[0] < 1050 + seed_image.get_rect()[2] \
                     and 90 < event.pos[1] < 90 + menu.image.get_rect()[3]:
                 if money > 1000 and tree_spots_taken.index(False) != -1:
+                    mixer.Channel(5).play(mixer.Sound("./sound/plant.wav"))
                     money -= 1000
                     num = random.randint(0, 100)
                     x = tree_spots_taken.index(False)
@@ -289,8 +303,10 @@ while status:
                     elif num < 90:
                         tree_list.append(TreeHealth(tree2_imagelist, tree_spots[x]))
             elif item == 'watercan' and not watering:
+                mixer.Channel(2).play(mixer.Sound("./sound/water.wav"))
                 for tree in tree_list:
-                    if check_tree_hitbox(tree, event.pos):
+                    if check_tree_hitbox(tree, event.pos) and money >= 100:
+                        money -= 100
                         tree.add_water()
                 water_pos = [event.pos[0] - 30, event.pos[1] - 70]
                 watering_can = Water(water_pos[0], water_pos[1])
@@ -298,15 +314,15 @@ while status:
                 watering = True
                 money -= 100
             elif item == 'fertilizer' and not fertilizing:
+                mixer.Channel(3).play(mixer.Sound("./sound/fertilizer.wav"))
                 for tree in tree_list:
-                    if check_tree_hitbox(tree, event.pos):
+                    if check_tree_hitbox(tree, event.pos) and money >= 100:
+                        money -= 100
                         tree.add_fertilizer()
-
                 fertilize_pos = [event.pos[0] - 20, event.pos[1] - 40]
                 fertilizing_bag = Fertilizer(fertilize_pos[0], fertilize_pos[1])
                 moving_sprites.add(fertilizing_bag)
                 fertilizing = True
-                money -= 100
                 for tree in tree_list:
                     if check_tree_hitbox(tree, event.pos):
                         tree.add_fertilizer()
@@ -314,6 +330,7 @@ while status:
                 for tree in tree_list:
                     print(event.pos, tree.rect.x, tree.rect.y, tree.rect)
                     if check_tree_hitbox(tree, event.pos):
+                        mixer.Channel(4).play(mixer.Sound("./sound/sell.wav"))
                         money += tree.get_value()
                         kill_tree(tree)
 
@@ -329,6 +346,7 @@ while status:
                 elif tree.water_state != 'thirsty' and tree.fertilizer_state != 'hungry':
                     tree.grow()
                     tree.check_growth()
+    check_loss()
     refresh_screen()
     clock.tick(60)
 
