@@ -78,8 +78,6 @@ tree_spots = [350, 650, 50, 950]
 tree_spots_taken = [True, False, False, False]
 tree_list = []
 tree_list.append(TreeHealth(tree1_imagelist, 350))
-tree_list.append(TreeHealth(tree2_imagelist, 650))
-tree_list.append(TreeHealth(tree3_imagelist, 50))
 water_time = 0
 watering = False
 water_pos = [0, 0]
@@ -89,6 +87,18 @@ fertilize_pos = [0, 0]
 seed_image = pygame.transform.scale(pygame.image.load('seed.png').convert_alpha(), (128, 128))
 austintree_image = pygame.transform.scale(pygame.image.load('tree.png').convert_alpha(), (128, 128))
 textbox_image = pygame.transform.scale(pygame.image.load('tree_textbox.png').convert_alpha(), (458, 512))
+text_list = [("Don't forget to water and fertilize",
+              " your trees so that they grow strong",
+              " and healthy!"),
+             ("Don't forget that your trees need",
+              "constant caring to stay alive!"),
+             ("Each tree has different monetary",
+              "values, but you don't care about",
+              "money do you?"),
+             ("Money is not the type of green that",
+              "will give out oxygen to the world!")]
+
+current_gospel = ''
 
 class Menu:
     def __init__(self, posx, posy):
@@ -207,6 +217,13 @@ def refresh_screen():
     # money counter
     money_text = font.render('$: {}'.format(money), True, (255, 255, 0))
     screen.blit(money_text, (1000, 20))
+    font1 = pygame.font.SysFont('Impact', 20)
+
+    a = 0
+    for i in current_gospel:
+        gospel_text = font1.render('{}'.format(i), True, (0, 0, 0))
+        screen.blit(gospel_text, (670, 70+(30*a)))
+        a+=1
     pygame.display.flip()
 
 
@@ -248,6 +265,21 @@ def kill_tree(tree):
     tree_list.remove(tree)
     del tree
 
+text = False
+text_time = 0
+def preach_brother():
+    global text
+    global current_gospel
+    global text_time
+    if random.randint(0, 100) == 0:
+        if not text:
+            text = True
+            text_time = pygame.time.get_ticks()
+            current_gospel = text_list[random.randint(0, len(text_list)-1)]
+        elif pygame.time.get_ticks() - text_time > 10000:
+            text = False
+            current_gospel = text_list[0]
+
 loss = False
 def check_loss():
     if money < 1000 and tree_spots_taken.index(True) == -1:
@@ -267,13 +299,13 @@ while status:
             elif event.key == pygame.K_r and loss == True:
                 money += 1000
                 tree_list.append(TreeHealth(tree1_imagelist, tree_spots[0]))
-        elif event.key == pygame.K_c:
-                for tree in tree_list:
-                    print(tree.alive)
-                    print(tree.water)
-                    print(tree.fertilizer)
-                    print(tree.growth)
-                    print(tree.growth_stage)
+            elif event.key == pygame.K_c:
+                    for tree in tree_list:
+                        print(tree.alive)
+                        print(tree.water)
+                        print(tree.fertilizer)
+                        print(tree.growth)
+                        print(tree.growth_stage)
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mixer.Channel(1).play(mixer.Sound("./sound/click.wav"))
@@ -290,7 +322,7 @@ while status:
                     menu.image = menu.imagelist[3]
             elif 1050 < event.pos[0] < 1050 + seed_image.get_rect()[2] \
                     and 90 < event.pos[1] < 90 + menu.image.get_rect()[3]:
-                if money > 1000 and tree_spots_taken.index(False) != -1:
+                if money > 1000 and tree_spots_taken.index(True) != -1:
                     mixer.Channel(5).play(mixer.Sound("./sound/plant.wav"))
                     money -= 1000
                     num = random.randint(0, 100)
@@ -312,7 +344,6 @@ while status:
                 watering_can = Water(water_pos[0], water_pos[1])
                 moving_sprites.add(watering_can)
                 watering = True
-                money -= 100
             elif item == 'fertilizer' and not fertilizing:
                 mixer.Channel(3).play(mixer.Sound("./sound/fertilizer.wav"))
                 for tree in tree_list:
@@ -347,6 +378,7 @@ while status:
                     tree.grow()
                     tree.check_growth()
     check_loss()
+    preach_brother()
     refresh_screen()
     clock.tick(60)
 
