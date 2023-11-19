@@ -2,7 +2,7 @@ import pygame
 import math
 import time
 
-from src.Tree import Tree
+from src.TreeHealth import TreeHealth
 
 
 # x location, y location, img width, img height, img file
@@ -15,7 +15,6 @@ class Platform(pygame.sprite.Sprite):
         self.rect.y = yloc
         self.rect.x = xloc
 
-
 pygame.init()
 
 screen = pygame.display.set_mode((1280, 720))
@@ -24,8 +23,8 @@ pygame.display.set_caption('TreeGame')
 
 clock = pygame.time.Clock()
 item = ''
-tree = Tree(300, 300)
-tree.img = pygame.transform.scale(pygame.image.load("tree.png").convert_alpha(), tree.size)
+tree_list = []
+tree_list.insert(0, TreeHealth(pygame.transform.scale(pygame.image.load("tree.png").convert_alpha(), (300, 300)), 200, 350))
 water_time = 0
 watering = False
 water_pos = [0, 0]
@@ -47,7 +46,6 @@ def water(pos):
     elif 750 < current_time - water_time < 1250:
         screen.blit(watercan[1], pos)
         pygame.display.flip()
-        tree.add_water()
     elif current_time - water_time > 1250:
         pygame.display.flip()
         water_time = current_time
@@ -64,7 +62,6 @@ def fertilize(pos):
     elif 750 < current_time - fertilizer_time < 1250:
         screen.blit(fertilizer[1], pos)
         pygame.display.flip()
-        tree.add_water()
     elif current_time - fertilizer_time > 1250:
         pygame.display.flip()
         fertilizer_time = current_time
@@ -80,7 +77,8 @@ def refresh_screen():
         water(water_pos)
     if fertilizing:
         fertilize(fertilize_pos)
-    screen.blit(tree.img, (200, 350))
+    for tree in tree_list:
+        screen.blit(tree.image, (tree.rect.x, tree.rect.y))
     pygame.display.flip()
 
 
@@ -90,20 +88,21 @@ sky = Platform(0, 0, 1300, 800, 'CloudsBack.png')
 all_sprites = pygame.sprite.Group()
 all_sprites.add(sky, platform)
 cloud = pygame.image.load('Clouds.png').convert_alpha()
-tiles = math.ceil(1280/cloud.get_width()) + 1
+tiles = math.ceil(1280 / cloud.get_width()) + 1
 scroll = 0
+
+
 # tree
 
 def clouds():
     global scroll
-    screen.blit(cloud, (cloud.get_width() + scroll+500, 0))
+    screen.blit(cloud, (cloud.get_width() + scroll + 500, 0))
     scroll -= 2
-    if abs(scroll) > cloud.get_width()+1300:
+    if abs(scroll) > cloud.get_width() + 1300:
         scroll = 0
 
-LOSE_WATER = pygame.USEREVENT + 1
-LOSE_NUTRIENTS = pygame.USEREVENT + 2
-pygame.time.set_timer(LOSE_WATER, 1000)
+
+LOSE_NUTRIENTS = pygame.USEREVENT + 1
 pygame.time.set_timer(LOSE_NUTRIENTS, 1000)
 
 status = True
@@ -118,20 +117,33 @@ while status:
             elif event.key == pygame.K_f:
                 item = 'fertilizer'
             elif event.key == pygame.K_c:
-                print(tree.water)
-                print(tree.nutrients)
+                for tree in tree_list:
+                    print(tree.water)
+                    print(tree.fertilizer)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if item == 'watercan':
                 water_pos = [event.pos[0] - 30, event.pos[1] - 70]
                 watering = True
+                for tree in tree_list:
+                    if tree.rect.x < event.pos[0] < tree.rect.x + tree.rect[2] and tree.rect.y < event.pos[0] < tree.rect.y + tree.rect[3]:
+                        tree.add_water()
             elif item == 'fertilizer':
                 fertilize_pos = [event.pos[0] - 20, event.pos[1] - 40]
                 fertilizing = True
-        elif event.type == LOSE_WATER:
-            tree.lose_water()
+                for tree in tree_list:
+                    if tree.rect.x < event.pos[0] < tree.rect.x + tree.rect[2] and tree.rect.y < event.pos[0] < tree.rect.y + tree.rect[3]:
+                        tree.add_fertilizer()
         elif event.type == LOSE_NUTRIENTS:
-            tree.lose_nutrients()
+            for tree in tree_list:
+                tree.lose_water()
+                tree.lose_fertilizer()
+                tree.check_water()
+                tree.check_fertilizer()
+                if tree.water == 'dry' or tree.water == 'soggy' or tree.fertilizer == 'starving' or tree.fertilizer == 'stuffed':
+                    del tree
+                elif tree.water != 'thirsty' and tree.fertilizer != 'hungry':
+                    tree.growth+=1
+                    tree.check_growth()
     refresh_screen()
-
 
 pygame.quit()
