@@ -12,14 +12,15 @@ class TreeHealth:
         self.rect.y = imagelist[0][1]
         self.water_state = 'normal'
         self.fertilizer_state = 'normal'
-        self.water = 0
-        self.fertilizer = 0
+        self.water = 500
+        self.fertilizer = 500
         self.WATER_MAX = 1000
         self.FERTILIZER_MAX = 1000
         self.growth = 0
         self.growth_stage = 0
         self.alive = True
         self.deadtime = 0
+        self.type = imagelist[-1]
 
     def lose_water(self):
         self.water = self.water - math.ceil(self.water * self.water / 100000)
@@ -69,6 +70,14 @@ class TreeHealth:
         elif self.fertilizer > self.FERTILIZER_MAX:
             self.fertilizer_state = 'stuffed'
 
+    def grow(self):
+        self.growth += 1
+        if self.type == 'birch':
+            if random.randint(0, 2) == 1:
+                self.growth += 1
+        elif self.type == 'normal':
+            self.growth += 1
+
     def check_growth(self):
         if self.growth_stage == 0 and self.growth > 10:
             self.update_stage(1)
@@ -82,4 +91,17 @@ class TreeHealth:
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = self.imagelist[self.growth_stage][1]
+
+    def get_value(self):
+        if not self.alive:
+            return 0
+        base_value = round(self.growth_stage * self.growth_stage * 1000 * random.uniform(0.9, 1.1))
+        if self.type == 'normal':
+            return base_value
+        elif self.type == 'birch':
+            return base_value * 2
+        elif self.type == 'cherry':
+            return base_value * 4
+        elif self.type == 'special':
+            return base_value * 10
 
