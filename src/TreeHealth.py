@@ -79,9 +79,9 @@ class TreeHealth:
             self.growth += 1
 
     def check_growth(self):
-        if self.growth_stage == 0 and self.growth > 10:
+        if self.growth_stage == 0 and self.growth > 50:
             self.update_stage(1)
-        elif self.growth_stage == 1 and self.growth > 20:
+        elif self.growth_stage == 1 and self.growth > 500:
             self.update_stage(1)
 
     def update_stage(self, x):
@@ -99,9 +99,9 @@ class TreeHealth:
         if self.type == 'normal':
             return base_value
         elif self.type == 'birch':
-            return base_value * 2
+            return round(base_value * 1.5)
         elif self.type == 'cherry':
-            return base_value * 4
+            return base_value * 2
         elif self.type == 'special':
-            return base_value * 10
+            return base_value * 5
 
