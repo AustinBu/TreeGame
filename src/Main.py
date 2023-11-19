@@ -2,8 +2,7 @@ import pygame
 import math
 import time
 
-from src.TreeHealth import TreeHealth
-
+from TreeHealth import TreeHealth
 
 # x location, y location, img width, img height, img file
 class Platform(pygame.sprite.Sprite):
@@ -18,6 +17,10 @@ class Platform(pygame.sprite.Sprite):
 pygame.init()
 
 screen = pygame.display.set_mode((1280, 720))
+#counter
+counter, text = 10, '10'.rjust(3)
+pygame.time.set_timer(pygame.USEREVENT, 1000)
+font = pygame.font.SysFont('Consolas', 30)
 
 pygame.display.set_caption('TreeGame')
 
@@ -122,6 +125,11 @@ def refresh_screen():
 
     for tree in tree_list:
         screen.blit(tree.image, (tree.rect.x, tree.rect.y))
+
+    font = pygame.font.SysFont('Impact', 60)
+    minutes = (pygame.time.get_ticks() - start_ticks) // 60000 
+    timer_text = font.render('YEARS PASSED: {}'.format(minutes), True, (255, 255, 255))
+    screen.blit(timer_text, (20, 20))
     pygame.display.flip()
 
 
@@ -131,7 +139,7 @@ def clouds():
         screen.blit(cloud, (i * cloud.get_width() + scroll, 0))
     scroll -= 1
     if abs(scroll) > cloud.get_width() :
-
+        scroll = 0
 # platform code
 platform = Platform(0, 650, 1300, 100, 'Tileset.png')
 sky = Platform(0, 0, 1300, 800, 'CloudsBack.png')
@@ -163,6 +171,7 @@ def clouds():
 
 LOSE_NUTRIENTS = pygame.USEREVENT + 1
 pygame.time.set_timer(LOSE_NUTRIENTS, 1000)
+start_ticks = pygame.time.get_ticks()
 
 status = True
 while status:
