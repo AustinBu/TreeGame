@@ -3,12 +3,12 @@ import random
 
 
 class TreeHealth:
-    def __init__(self, imagelist, x, y):
+    def __init__(self, imagelist, x):
         self.imagelist = imagelist
-        self.image = imagelist[0]
+        self.image = imagelist[0][0]
         self.rect = self.image.get_rect()
         self.rect.x = x
-        self.rect.y = y
+        self.rect.y = imagelist[0][1]
         self.water_state = 'normal'
         self.fertilizer_state = 'normal'
         self.water = 500
@@ -62,11 +62,20 @@ class TreeHealth:
             self.fertilizer_state = 'stuffed'
 
     def check_growth(self):
-        if self.growth_stage == 0 and self.growth > 50:
+        if self.growth_stage == 0 and self.growth > 15:
             self.growth_stage = 1
-            self.image = self.imagelist[1]
-        elif self.growth_stage == 1 and self.growth > 550:
+            self.image = self.imagelist[1][0]
+            x = self.rect.x
+            self.rect = self.image.get_rect()
+            self.rect.x = x
+            self.rect.y = self.imagelist[1][1]
+        elif self.growth_stage == 1 and self.growth > 30:
             self.growth_stage = 2
+            self.image = self.imagelist[2][0]
+            x = self.rect.x
+            self.rect = self.image.get_rect()
+            self.rect.x = x
+            self.rect.y = self.imagelist[2][1]
         elif self.growth_stage == 2 and self.growth > 2000:
             self.growth_stage = 3
 
