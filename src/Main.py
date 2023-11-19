@@ -176,16 +176,12 @@ def refresh_screen():
     for tree in tree_list:
         screen.blit(tree.image, (tree.rect.x, tree.rect.y))
 
-    #timer
     font = pygame.font.SysFont('Impact', 60)
     minutes = (pygame.time.get_ticks() - start_ticks) // 60000 
     timer_text = font.render('YEARS PASSED: {}'.format(minutes), True, (255, 255, 255))
     screen.blit(timer_text, (20, 20))
-    #money counter
-    money_text = font.render('$: {}'.format(money),True,(255,255,0))
-    screen.blit(money_text,(1000,20))
-
     pygame.display.flip()
+
 
 def clouds():
     global scroll
@@ -212,7 +208,6 @@ scroll = 0
 LOSE_NUTRIENTS = pygame.USEREVENT + 1
 pygame.time.set_timer(LOSE_NUTRIENTS, 1000)
 start_ticks = pygame.time.get_ticks()
-money = 0
 
 status = True
 while status:
@@ -239,7 +234,6 @@ while status:
                 watering_can = Water(water_pos[0], water_pos[1])
                 moving_sprites.add(watering_can)
                 watering = True
-                money -= 100
             elif item == 'fertilizer' and not fertilizing:
                 for tree in tree_list:
                     if tree.rect.x < event.pos[0] < tree.rect.x + tree.rect[2] and tree.rect.y < event.pos[0] \
@@ -250,7 +244,6 @@ while status:
                 fertilizing_bag = Fertilizer(fertilize_pos[0], fertilize_pos[1])
                 moving_sprites.add(fertilizing_bag)
                 fertilizing = True
-                money -= 100
                 for tree in tree_list:
                     if tree.rect.x < event.pos[0] < tree.rect.x + tree.rect[2] and tree.rect.y < event.pos[0] \
                             < tree.rect.y + tree.rect[3]:
