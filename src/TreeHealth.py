@@ -1,21 +1,25 @@
 import math
 import random
+import pygame
 
 
 class TreeHealth:
-    def __init__(self, image, x, y):
-        self.image = image
-        self.rect = image.get_rect()
+    def __init__(self, imagelist, x):
+        self.imagelist = imagelist
+        self.image = imagelist[0][0]
+        self.rect = self.image.get_rect()
         self.rect.x = x
-        self.rect.y = y
+        self.rect.y = imagelist[0][1]
         self.water_state = 'normal'
         self.fertilizer_state = 'normal'
-        self.water = 500
-        self.fertilizer = 500
+        self.water = 0
+        self.fertilizer = 0
         self.WATER_MAX = 1000
         self.FERTILIZER_MAX = 1000
         self.growth = 0
         self.growth_stage = 0
+        self.alive = True
+        self.deadtime = 0
 
     def lose_water(self):
         self.water = self.water - math.ceil(self.water * self.water / 100000)
@@ -24,14 +28,21 @@ class TreeHealth:
         self.fertilizer = self.fertilizer - random.randint(1, 10)
 
     def add_water(self):
-        self.water = self.water + 100
+        if self.alive:
+            self.water = self.water + 100
 
     def add_fertilizer(self):
-        self.fertilizer = self.fertilizer + 150
+        if self.alive:
+            self.fertilizer = self.fertilizer + 150
 
     def check_water(self):
         if self.water <= 0:
             self.water_state = 'dry'
+            if self.alive:
+                self.update_stage(3)
+                self.deadtime = pygame.time.get_ticks()
+            self.alive = False
+            self.growth = 0
         elif self.water <= 300:
             self.water_state = 'thirsty'
         elif self.water <= 800:
@@ -44,6 +55,11 @@ class TreeHealth:
     def check_fertilizer(self):
         if self.fertilizer <= 0:
             self.fertilizer_state = 'starving'
+            self.growth = 0
+            if self.alive:
+                self.update_stage(3)
+                self.deadtime = pygame.time.get_ticks()
+            self.alive = False
         elif self.fertilizer <= 300:
             self.fertilizer_state = 'hungry'
         elif self.fertilizer <= 800:
@@ -54,8 +70,16 @@ class TreeHealth:
             self.fertilizer_state = 'stuffed'
 
     def check_growth(self):
-        if self.growth_stage == 0 and self.growth > 50:
-            self.growth_stage = 1
-        elif self.growth_stage == 1 and self.growth > 550:
-            self.growth_stage = 2
+        if self.growth_stage == 0 and self.growth > 10:
+            self.update_stage(1)
+        elif self.growth_stage == 1 and self.growth > 20:
+            self.update_stage(1)
+
+    def update_stage(self, x):
+        self.growth_stage += x
+        self.image = self.imagelist[self.growth_stage][0]
+        x = self.rect.x
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = self.imagelist[self.growth_stage][1]
 
