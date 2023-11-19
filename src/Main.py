@@ -23,8 +23,10 @@ pygame.display.set_caption('TreeGame')
 
 clock = pygame.time.Clock()
 item = ''
+tree1_imagelist = [pygame.transform.scale(pygame.image.load("alive_adult.png").convert_alpha(), (400, 500)),
+                   pygame.transform.scale(pygame.image.load("almost_dead_adult.png").convert_alpha(), (400, 500))]
 tree_list = []
-tree_list.insert(0, TreeHealth(pygame.transform.scale(pygame.image.load("tree.png").convert_alpha(), (300, 300)), 200, 350))
+tree_list.insert(0, TreeHealth(tree1_imagelist, 200, 320))
 water_time = 0
 watering = False
 water_pos = [0, 0]
@@ -94,6 +96,8 @@ def refresh_screen():
     global watering,watering_can,moving_sprites
     clock.tick(30)
     all_sprites.draw(screen)
+    for tree in tree_list:
+        screen.blit(tree.image, (tree.rect.x, tree.rect.y))
     clouds()
     moving_sprites.update()
     moving_sprites.draw(screen)
@@ -105,8 +109,6 @@ def refresh_screen():
 
     if fertilizing:
         fertilize(fertilize_pos)
-    for tree in tree_list:
-        screen.blit(tree.image, (tree.rect.x, tree.rect.y))
     pygame.display.flip()
 
 
@@ -116,6 +118,7 @@ def clouds():
         screen.blit(cloud, (i * cloud.get_width() + scroll, 0))
     scroll -= 1
     if abs(scroll) > cloud.get_width() :
+        scroll = 0
 
 # platform code
 platform = Platform(0, 650, 1300, 100, 'Tileset.png')
@@ -130,21 +133,6 @@ scroll = 0
 
 tiles = math.ceil(1280/cloud.get_width()) + 1
 scroll = 0
-
-def clouds():
-    global scroll
-    screen.blit(cloud, (cloud.get_width() + scroll+500, 0))
-    scroll -= 2
-    if abs(scroll) > cloud.get_width()+1300:
-        scroll = 0
-
-def clouds():
-    global scroll
-    screen.blit(cloud, (cloud.get_width() + scroll + 500, 0))
-    scroll -= 2
-    if abs(scroll) > cloud.get_width() + 1300:
-        scroll = 0
-
 
 LOSE_NUTRIENTS = pygame.USEREVENT + 1
 pygame.time.set_timer(LOSE_NUTRIENTS, 1000)
@@ -161,6 +149,12 @@ while status:
                 item = 'watercan'
             elif event.key == pygame.K_f:
                 item = 'fertilizer'
+            elif event.key == pygame.K_c:
+                for tree in tree_list:
+                    print(tree.water)
+                    print(tree.fertilizer)
+                    print(tree.growth)
+
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if item == 'watercan' and not watering:
                 water_pos = [event.pos[0] - 30, event.pos[1] - 70]
@@ -168,13 +162,15 @@ while status:
                 moving_sprites.add(watering_can)
                 watering = True
                 for tree in tree_list:
-                    if tree.rect.x < event.pos[0] < tree.rect.x + tree.rect[2] and tree.rect.y < event.pos[0] < tree.rect.y + tree.rect[3]:
+                    if tree.rect.x < event.pos[0] < tree.rect.x + tree.rect[2] and tree.rect.y < event.pos[0] \
+                            < tree.rect.y + tree.rect[3]:
                         tree.add_water()
             elif item == 'fertilizer':
                 fertilize_pos = [event.pos[0] - 20, event.pos[1] - 40]
                 fertilizing = True
                 for tree in tree_list:
-                    if tree.rect.x < event.pos[0] < tree.rect.x + tree.rect[2] and tree.rect.y < event.pos[0] < tree.rect.y + tree.rect[3]:
+                    if tree.rect.x < event.pos[0] < tree.rect.x + tree.rect[2] and tree.rect.y < event.pos[0] \
+                            < tree.rect.y + tree.rect[3]:
                         tree.add_fertilizer()
         elif event.type == LOSE_NUTRIENTS:
             for tree in tree_list:
@@ -182,7 +178,8 @@ while status:
                 tree.lose_fertilizer()
                 tree.check_water()
                 tree.check_fertilizer()
-                if tree.water == 'dry' or tree.water == 'soggy' or tree.fertilizer == 'starving' or tree.fertilizer == 'stuffed':
+                if not tree.alive and tree.growth > 100:
+                    tree_list.remove(tree)
                     del tree
                 elif tree.water != 'thirsty' and tree.fertilizer != 'hungry':
                     tree.growth+=1
