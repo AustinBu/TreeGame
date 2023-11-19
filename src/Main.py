@@ -2,18 +2,7 @@ import pygame
 import math
 import time
 
-from src.Tree import Tree
-
-
-# x location, y location, img width, img height, img file
-class Platform(pygame.sprite.Sprite):
-    def __init__(self, xloc, yloc, imgw, imgh, img):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(img).convert()
-        self.image = pygame.transform.scale(self.image, (imgw, imgh))
-        self.rect = self.image.get_rect()
-        self.rect.y = yloc
-        self.rect.x = xloc
+from Tree import Tree
 
 
 pygame.init()
@@ -87,12 +76,19 @@ def refresh_screen():
 # platform code
 platform = Platform(0, 650, 1300, 100, 'Tileset.png')
 sky = Platform(0, 0, 1300, 800, 'CloudsBack.png')
+#sprites
 all_sprites = pygame.sprite.Group()
 all_sprites.add(sky, platform)
-cloud = pygame.image.load('Clouds.png').convert_alpha()
+
 tiles = math.ceil(1280/cloud.get_width()) + 1
 scroll = 0
-# tree
+
+def clouds():
+    global scroll
+    screen.blit(cloud, (cloud.get_width() + scroll+500, 0))
+    scroll -= 2
+    if abs(scroll) > cloud.get_width()+1300:
+        scroll = 0
 
 def clouds():
     global scroll
@@ -117,9 +113,6 @@ while status:
                 item = 'watercan'
             elif event.key == pygame.K_f:
                 item = 'fertilizer'
-            elif event.key == pygame.K_c:
-                print(tree.water)
-                print(tree.nutrients)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if item == 'watercan':
                 water_pos = [event.pos[0] - 30, event.pos[1] - 70]
