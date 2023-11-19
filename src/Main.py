@@ -24,16 +24,44 @@ pygame.display.set_caption('TreeGame')
 
 clock = pygame.time.Clock()
 item = ''
-tree1_imagelist = [(pygame.transform.scale(pygame.image.load("healthy_cherry_blossom_sapling.png").convert_alpha(), (200, 200)), 500),
-                   (pygame.transform.scale(pygame.image.load("alive_adult.png").convert_alpha(), (400, 500)), 315),
-                   (pygame.transform.scale(pygame.image.load("almost_dead_adult.png").convert_alpha(), (400, 500)), 320)]
-tree2_imagelist = [(pygame.transform.scale(pygame.image.load("healthy_cherry_blossom_sapling.png").convert_alpha(), (200, 200)), 500),
-                   (pygame.transform.scale(pygame.image.load("cherr_blossom_midstate.png").convert_alpha(), (400, 500)), 210),
-                   (pygame.transform.scale(pygame.image.load("cherry_blossom_alive.png").convert_alpha(), (400, 500)), 210),
-                   (pygame.transform.scale(pygame.image.load("dead_cherry_blossom_sapling.png").convert_alpha(), (400, 500)), 500)]
-tree3_imagelist = [(pygame.transform.scale(pygame.image.load("healthy_cherry_blossom_sapling.png").convert_alpha(), (200, 200)), 500),
-                   (pygame.transform.scale(pygame.image.load("Birch_midstate.png").convert_alpha(), (400, 500)), 300),
-                   (pygame.transform.scale(pygame.image.load("BirchAlive.png").convert_alpha(), (400, 500)), 300)]
+tree1_imagelist = [(pygame.transform.scale(pygame.image.load("./Trees/Normal/normal_alive_sapling.png")
+                                           .convert_alpha(), (200, 200)), 500),
+                   (pygame.transform.scale(pygame.image.load("./Trees/Normal/normal_alive_midstage.png")
+                                           .convert_alpha(), (300, 400)), 310),
+                   (pygame.transform.scale(pygame.image.load("./Trees/Normal/normal_alive_adult.png")
+                                           .convert_alpha(), (400, 500)), 320),
+                   (pygame.transform.scale(pygame.image.load("./Trees/Normal/normal_dead_sapling.png")
+                                           .convert_alpha(), (200, 200)), 500),
+                   (pygame.transform.scale(pygame.image.load("./Trees/Normal/normal_dead_midstage.png")
+                                           .convert_alpha(), (300, 400)), 310),
+                   (pygame.transform.scale(pygame.image.load("./Trees/Normal/normal_dead_adult.png")
+                                           .convert_alpha(), (400, 500)), 270)]
+
+tree2_imagelist = [(pygame.transform.scale(pygame.image.load("./Trees/CherryBlossom/healthy_cherry_blossom_sapling.png")
+                                           .convert_alpha(), (200, 200)), 500),
+                   (pygame.transform.scale(pygame.image.load("./Trees/CherryBlossom/CherryB_Alive_midstage.png")
+                                           .convert_alpha(), (400, 500)), 240),
+                   (pygame.transform.scale(pygame.image.load("./Trees/CherryBlossom/CherryB_Alive_Adult.png")
+                                           .convert_alpha(), (400, 500)), 210),
+                   (pygame.transform.scale(pygame.image.load("./Trees/CherryBlossom/dead_cherry_blossom_sapling.png")
+                                           .convert_alpha(), (200, 200)), 500),
+                   (pygame.transform.scale(pygame.image.load("./Trees/CherryBlossom/CherryB_Dead_midstage.png")
+                                           .convert_alpha(), (400, 500)), 240),
+                   (pygame.transform.scale(pygame.image.load("./Trees/CherryBlossom/CherryB_Dead_Adult.png")
+                                           .convert_alpha(), (400, 500)), 210)]
+
+tree3_imagelist = [(pygame.transform.scale(pygame.image.load("./Trees/Birch/birch_normal_sapling.png")
+                                           .convert_alpha(), (200, 200)), 500),
+                   (pygame.transform.scale(pygame.image.load("./Trees/Birch/birch_alive_midstage.png")
+                                           .convert_alpha(), (300, 400)), 310),
+                   (pygame.transform.scale(pygame.image.load("./Trees/Birch/BirchAlive.png")
+                                           .convert_alpha(), (400, 500)), 300),
+                   (pygame.transform.scale(pygame.image.load("./Trees/Birch/birch_dead_sapling.png")
+                                           .convert_alpha(), (200, 200)), 500),
+                   (pygame.transform.scale(pygame.image.load("./Trees/Birch/birch_dead_midstageORadult.png")
+                                           .convert_alpha(), (300, 400)), 310),
+                   (pygame.transform.scale(pygame.image.load("./Trees/Birch/birch_dead_adult.png")
+                                           .convert_alpha(), (400, 500)), 300)]
 tree_list = []
 tree_list.append(TreeHealth(tree1_imagelist, 350))
 tree_list.append(TreeHealth(tree2_imagelist, 650))
@@ -183,9 +211,11 @@ while status:
                 item = 'fertilizer'
             elif event.key == pygame.K_c:
                 for tree in tree_list:
+                    print(tree.alive)
                     print(tree.water)
                     print(tree.fertilizer)
                     print(tree.growth)
+                    print(tree.growth_stage)
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if item == 'watercan' and not watering:
@@ -213,10 +243,11 @@ while status:
                 tree.lose_fertilizer()
                 tree.check_water()
                 tree.check_fertilizer()
-                if not tree.alive and tree.growth > 100:
-                    tree_list.remove(tree)
-                    del tree
-                elif tree.water != 'thirsty' and tree.fertilizer != 'hungry':
+                if not tree.alive:
+                    if pygame.time.get_ticks() - tree.deadtime > 20000:
+                        tree_list.remove(tree)
+                        del tree
+                elif tree.water_state != 'thirsty' and tree.fertilizer_state != 'hungry':
                     tree.growth += 1
                     tree.check_growth()
     refresh_screen()
