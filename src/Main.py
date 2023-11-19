@@ -85,6 +85,7 @@ def refresh_screen():
 # platform code
 platform = Platform(0, 650, 1300, 100, 'Tileset.png')
 sky = Platform(0, 0, 1300, 800, 'CloudsBack.png')
+#sprites
 all_sprites = pygame.sprite.Group()
 all_sprites.add(sky, platform)
 cloud = pygame.image.load('Clouds.png').convert_alpha()
@@ -92,7 +93,15 @@ tiles = math.ceil(1280 / cloud.get_width()) + 1
 scroll = 0
 
 
-# tree
+tiles = math.ceil(1280/cloud.get_width()) + 1
+scroll = 0
+
+def clouds():
+    global scroll
+    screen.blit(cloud, (cloud.get_width() + scroll+500, 0))
+    scroll -= 2
+    if abs(scroll) > cloud.get_width()+1300:
+        scroll = 0
 
 def clouds():
     global scroll
@@ -120,6 +129,7 @@ while status:
                 for tree in tree_list:
                     print(tree.water)
                     print(tree.fertilizer)
+
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if item == 'watercan':
                 water_pos = [event.pos[0] - 30, event.pos[1] - 70]
